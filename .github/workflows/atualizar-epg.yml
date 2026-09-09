@@ -1,0 +1,40 @@
+name: Atualizar EPG
+
+on:
+  schedule:
+    - cron: "30 9 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Atualizar EPG
+        run: python atualizar_epg.py
+
+      - name: Salvar novo EPG
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add claro-CanaisBR01-V3.xml
+
+          if git diff --cached --quiet; then
+            echo "EPG sem alterações."
+          else
+            git commit -m "Atualização automática do EPG"
+            git push
+          fi
